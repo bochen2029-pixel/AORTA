@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AORTA — Organ Recovery & Transplant Assistance</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0f1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a2236;
+            --bg-input: #0d1424;
+            --border: #243049;
+            --border-active: #3b82f6;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+            --confidence-high: #10b981;
+            --confidence-moderate: #f59e0b;
+            --confidence-low: #ef4444;
+            --human-line: #f43f5e;
+            --user-bubble: #1e3a5f;
+            --ai-bubble: #1a2236;
+            --scrollbar: #243049;
+            --scrollbar-thumb: #3b5278;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+        /* ============ HEADER ============ */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 24px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            letter-spacing: -1px;
+            box-shadow: 0 2px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-title h1 {
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: var(--text-primary);
+        }
+
+        .header-title span {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            margin-top: 1px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .connection-badge {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.68rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .connection-badge:hover {
+            border-color: var(--accent);
+        }
+
+        .conn-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            transition: all 0.3s;
+        }
+
+        .conn-dot.connected {
+            background: var(--confidence-high);
+            box-shadow: 0 0 8px var(--confidence-high);
+        }
+
+        .conn-dot.error {
+            background: var(--confidence-low);
+            box-shadow: 0 0 8px var(--confidence-low);
+        }
+
+        .conn-dot.testing {
+            background: var(--confidence-moderate);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .settings-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .settings-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ============ CHAT AREA ============ */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 0;
+            scroll-behavior: smooth;
+        }
+
+        .chat-inner {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Welcome message */
+        .welcome {
+            text-align: center;
+            padding: 60px 20px 40px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 24px rgba(59, 130, 246, 0.25);
+        }
+
+        .welcome h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .welcome p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            max-width: 500px;
+            margin: 0 auto 28px;
+        }
+
+        .quick-prompts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .quick-prompt {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-prompt:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        /* Messages */
+        .message {
+            margin-bottom: 20px;
+            animation: messageIn 0.3s ease;
+        }
+
+        @keyframes messageIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-user {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .message-user .bubble {
+            background: var(--user-bubble);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 18px 18px 4px 18px;
+            padding: 12px 18px;
+            max-width: 75%;
+            font-size: 0.88rem;
+            line-height: 1.55;
+        }
+
+        .message-ai {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .ai-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .message-ai .bubble {
+            background: var(--ai-bubble);
+            border: 1px solid var(--border);
+            border-radius: 4px 18px 18px 18px;
+            padding: 14px 18px;
+            max-width: 85%;
+            font-size: 0.88rem;
+            line-height: 1.65;
+            color: var(--text-primary);
+        }
+
+        .message-ai .bubble p {
+            margin-bottom: 10px;
+        }
+
+        .message-ai .bubble p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Confidence tags in responses */
+        .confidence-tag {
+            display: inline-block;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+        }
+
+        .confidence-high {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--confidence-high);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .confidence-moderate {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--confidence-moderate);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .confidence-low {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--confidence-low);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            padding: 8px 0;
+        }
+
+        .typing-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-6px); opacity: 1; }
+        }
+
+        /* ============ INPUT AREA ============ */
+        .input-area {
+            padding: 16px 20px 20px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .input-inner {
+            max-width: 780px;
+            margin: 0 auto;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        #user-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 18px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            resize: none;
+            outline: none;
+            min-height: 48px;
+            max-height: 150px;
+            transition: border-color 0.2s;
+        }
+
+        #user-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        #user-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-btn {
+            width: 48px;
+            height: 48px;
+            background: var(--accent);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            background: #2563eb;
+            transform: scale(1.04);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .input-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .model-label {
+            font-family: 'IBM Plex Mono', monospace;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ============ SETTINGS MODAL ============ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 480px;
+            padding: 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .modal-subtitle {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: var(--text-primary);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.82rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+        }
+
+        .form-hint {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-muted);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-test {
+            background: transparent;
+            color: var(--confidence-high);
+            border: 1px solid var(--confidence-high);
+        }
+
+        .btn-test:hover {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .test-result {
+            font-size: 0.75rem;
+            margin-top: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .test-result.success {
+            display: block;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--confidence-high);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .test-result.error {
+            display: block;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--confidence-low);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 640px) {
+            .header { padding: 12px 16px; }
+            .header-title h1 { font-size: 0.9rem; }
+            .chat-inner { padding: 0 14px; }
+            .input-area { padding: 12px 14px 16px; }
+            .message-user .bubble { max-width: 88%; }
+            .message-ai .bubble { max-width: 92%; }
+            .quick-prompts { gap: 6px; }
+            .quick-prompt { font-size: 0.72rem; padding: 7px 12px; }
+            .welcome h2 { font-size: 1.15rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">A</div>
+            <div class="header-title">
+                <h1>AORTA</h1>
+                <span>AI for Organ Recovery & Transplant Assistance</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="connection-badge" onclick="openSettings()" title="Connection settings">
+                <div class="conn-dot" id="conn-dot"></div>
+                <span id="conn-label">Disconnected</span>
+            </div>
+            <button class="settings-btn" onclick="openSettings()" title="Settings">⚙</button>
+        </div>
+    </div>
+
+    <!-- CHAT AREA -->
+    <div class="chat-container" id="chat-container">
+        <div class="chat-inner" id="chat-inner">
+            <div class="welcome" id="welcome">
+                <div class="welcome-icon">A</div>
+                <h2>AORTA is ready</h2>
+                <p>Policy-fluent, confidence-tagged, locally hosted. Ask about OPTN policy, allocation protocols, documentation, or coordinator workflow.</p>
+                <div class="quick-prompts">
+                    <button class="quick-prompt" onclick="sendQuick(this)">What are the UNOS requirements for DCD organ recovery?</button>
+                    <button class="quick-prompt" onclick="sendQuick(this)">Walk me through first-person consent on the registry</button>
+                    <button class="quick-prompt" onclick="sendQuick(this)">Help me draft a case handoff note</button>
+                    <button class="quick-prompt" onclick="sendQuick(this)">I just lost a pediatric donor. I need a minute.</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INPUT AREA -->
+    <div class="input-area">
+        <div class="input-inner">
+            <div class="input-row">
+                <div class="input-wrapper">
+                    <textarea id="user-input" rows="1" placeholder="Ask AORTA anything..." 
+                        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+                </div>
+                <button class="send-btn" id="send-btn" onclick="sendMessage()" title="Send">↑</button>
+            </div>
+            <div class="input-footer">
+                <span class="model-label">
+                    <span id="model-indicator">●</span>
+                    <span id="model-name">LM Studio · localhost:1234</span>
+                </span>
+                <span>Offline · HIPAA-safe · No data leaves this machine</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal">
+            <h3>Connection Settings</h3>
+            <p class="modal-subtitle">Configure the LM Studio local server connection</p>
+
+            <div class="form-group">
+                <label class="form-label">API Endpoint</label>
+                <input class="form-input" id="cfg-endpoint" value="http://localhost:1234/v1/chat/completions">
+                <div class="form-hint">LM Studio default. Change port if you modified it in LM Studio server settings.</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Model Name (optional)</label>
+                <input class="form-input" id="cfg-model" placeholder="auto-detect from LM Studio">
+                <div class="form-hint">Leave blank to use whatever model is currently loaded in LM Studio.</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Temperature</label>
+                <input class="form-input" id="cfg-temp" type="number" value="0.4" min="0" max="2" step="0.1">
+                <div class="form-hint">Lower = more focused. 0.3–0.5 recommended for policy questions.</div>
+            </div>
+
+            <div id="test-result" class="test-result"></div>
+
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+                <button class="btn btn-test" onclick="testConnection()">Test</button>
+                <button class="btn btn-primary" onclick="saveSettings()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ============================================================
+    // AORTA CHAT — LM Studio Local Interface
+    // ============================================================
+
+    const SYSTEM_PROMPT = `You are AORTA (AI for Organ Recovery and Transplant Assistance). You are an organizational intelligence for organ procurement — warm, competent, policy-fluent, honest about what you know and don't. You sound like a seasoned ORC supervisor: calm, knowledgeable, brief by default. You tag confidence (HIGH/MODERATE/LOW) on policy answers. You never fabricate citations. You never cross the Human Line — you advise, you don't decide. You never use chatbot filler phrases. You redirect clinical decisions to physicians and coordinators. You are a colleague, not a service.
+
+---
+
+## Confidence Calibration
+- HIGH — Well-established OPTN/CMS/UAGA policy, federal regulation, or universal OPO practice. You can cite the framework.
+- MODERATE — Correct general principle, but implementation varies by OPO, region, or is in active policy evolution. Say what you know and flag the variance.
+- LOW — Edge case, emerging practice, or area where your training data may be incomplete. State your best understanding and recommend verification.
+Do not understate confidence to seem humble. If you know it, say HIGH.
+
+## Human Line — Hard Boundaries
+You NEVER:
+- Make or authorize clinical decisions
+- Contact families, physicians, hospitals, or any external party
+- Approve cases for allocation or authorize OR bookings
+- Script exact words for family conversations
+- Override coordinator or physician judgment
+You advise, prepare, inform, draft, and support. The human decides and acts.
+
+## Anti-Sycophancy
+- If the user states something incorrect, correct them directly and respectfully
+- Never agree with wrong information to be polite
+- Never inflate praise — you are a colleague, not a cheerleader
+- Avoid: "Great question!", "Absolutely!", "I'm glad you asked", "That's a really important point"
+- If you don't know, say so. Do not fabricate citations or policy numbers.
+
+## Brevity
+Default to short, direct answers. Expand only when the question requires it or when a coordinator is clearly learning. If your response is more than 3 paragraphs, you should have a good reason.
+
+## Response Discipline
+Before responding, check:
+1. Did I tag confidence on policy answers?
+2. Did I stay on my side of the Human Line?
+3. Did I avoid chatbot filler phrases?
+4. Am I being honest about what I don't know?
+5. Is this as brief as it can be while still being useful?
+
+## RAG Citation Behavior
+When you have retrieved policy chunks available in context, cite the specific OPTN Policy section number (e.g., "Per OPTN Policy 9.5.I..."). Distinguish between what you retrieved from policy documents vs. what you know from training. If a retrieved chunk partially answers the question, say what it covers and what it doesn't.`;
+
+    // State
+    let config = {
+        endpoint: 'http://localhost:1234/v1/chat/completions',
+        model: '',
+        temperature: 0.4
+    };
+    let conversationHistory = [];
+    let isGenerating = false;
+
+    // ============================================================
+    // CHAT FUNCTIONS
+    // ============================================================
+
+    function sendQuick(btn) {
+        const text = btn.textContent;
+        document.getElementById('user-input').value = text;
+        sendMessage();
+    }
+
+    function handleKey(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    }
+
+    function autoResize(el) {
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 150) + 'px';
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('user-input');
+        const text = input.value.trim();
+        if (!text || isGenerating) return;
+
+        // Hide welcome
+        const welcome = document.getElementById('welcome');
+        if (welcome) welcome.style.display = 'none';
+
+        // Add user message
+        addMessage(text, 'user');
+        conversationHistory.push({ role: 'user', content: text });
+
+        // Clear input
+        input.value = '';
+        input.style.height = 'auto';
+
+        // Show typing
+        const typingEl = addTypingIndicator();
+        isGenerating = true;
+        document.getElementById('send-btn').disabled = true;
+
+        try {
+            const response = await callLLM();
+            typingEl.remove();
+
+            // Format and add AI message
+            const formatted = formatResponse(response);
+            addMessage(formatted, 'ai');
+            conversationHistory.push({ role: 'assistant', content: response });
+
+        } catch (err) {
+            typingEl.remove();
+            addMessage(`Connection error: ${err.message}. Make sure LM Studio is running with a model loaded and CORS enabled in server settings.`, 'ai', true);
+        }
+
+        isGenerating = false;
+        document.getElementById('send-btn').disabled = false;
+        scrollToBottom();
+    }
+
+    async function callLLM() {
+        const messages = [
+            { role: 'system', content: SYSTEM_PROMPT },
+            ...conversationHistory
+        ];
+
+        const body = {
+            messages,
+            temperature: config.temperature,
+            max_tokens: 1500,
+            stream: false
+        };
+
+        if (config.model) {
+            body.model = config.model;
+        }
+
+        const response = await fetch(config.endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error?.message || `HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content || 'No response generated.';
+    }
+
+    // ============================================================
+    // UI HELPERS
+    // ============================================================
+
+    function addMessage(content, role, isError = false) {
+        const container = document.getElementById('chat-inner');
+        const div = document.createElement('div');
+        div.className = `message message-${role}`;
+
+        if (role === 'user') {
+            div.innerHTML = `<div class="bubble">${escapeHtml(content)}</div>`;
+        } else {
+            div.innerHTML = `
+                <div class="ai-avatar">A</div>
+                <div class="bubble${isError ? ' error' : ''}">${content}</div>
+            `;
+        }
+
+        container.appendChild(div);
+        scrollToBottom();
+    }
+
+    function addTypingIndicator() {
+        const container = document.getElementById('chat-inner');
+        const div = document.createElement('div');
+        div.className = 'message message-ai';
+        div.id = 'typing';
+        div.innerHTML = `
+            <div class="ai-avatar">A</div>
+            <div class="bubble">
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+        scrollToBottom();
+        return div;
+    }
+
+    function formatResponse(text) {
+        // Escape HTML first
+        let html = escapeHtml(text);
+
+        // Confidence tags
+        html = html.replace(/\b(HIGH)\s*(confidence|CONFIDENCE)/gi, 
+            '<span class="confidence-tag confidence-high">HIGH</span> confidence');
+        html = html.replace(/\b(MODERATE)\s*(confidence|CONFIDENCE)/gi, 
+            '<span class="confidence-tag confidence-moderate">MODERATE</span> confidence');
+        html = html.replace(/\b(LOW)\s*(confidence|CONFIDENCE)/gi, 
+            '<span class="confidence-tag confidence-low">LOW</span> confidence');
+
+        // Standalone confidence tags
+        html = html.replace(/\[HIGH\]/g, '<span class="confidence-tag confidence-high">HIGH</span>');
+        html = html.replace(/\[MODERATE\]/g, '<span class="confidence-tag confidence-moderate">MODERATE</span>');
+        html = html.replace(/\[LOW\]/g, '<span class="confidence-tag confidence-low">LOW</span>');
+
+        // Bold
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        // Paragraphs
+        html = html.split('\n\n').map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+
+        return html;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function scrollToBottom() {
+        const container = document.getElementById('chat-container');
+        requestAnimationFrame(() => {
+            container.scrollTop = container.scrollHeight;
+        });
+    }
+
+    // ============================================================
+    // SETTINGS
+    // ============================================================
+
+    function openSettings() {
+        document.getElementById('cfg-endpoint').value = config.endpoint;
+        document.getElementById('cfg-model').value = config.model;
+        document.getElementById('cfg-temp').value = config.temperature;
+        document.getElementById('test-result').className = 'test-result';
+        document.getElementById('test-result').textContent = '';
+        document.getElementById('settings-modal').classList.add('active');
+    }
+
+    function closeSettings() {
+        document.getElementById('settings-modal').classList.remove('active');
+    }
+
+    function saveSettings() {
+        config.endpoint = document.getElementById('cfg-endpoint').value.trim();
+        config.model = document.getElementById('cfg-model').value.trim();
+        config.temperature = parseFloat(document.getElementById('cfg-temp').value) || 0.4;
+        closeSettings();
+        testConnectionSilent();
+    }
+
+    async function testConnection() {
+        const resultEl = document.getElementById('test-result');
+        const endpoint = document.getElementById('cfg-endpoint').value.trim();
+        const model = document.getElementById('cfg-model').value.trim();
+
+        resultEl.className = 'test-result';
+        resultEl.textContent = 'Testing...';
+        resultEl.style.display = 'block';
+
+        try {
+            const body = {
+                messages: [
+                    { role: 'system', content: 'Respond with only: OK' },
+                    { role: 'user', content: 'ping' }
+                ],
+                max_tokens: 10,
+                temperature: 0
+            };
+            if (model) body.model = model;
+
+            const resp = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const data = await resp.json();
+            const modelUsed = data.model || model || 'auto';
+
+            resultEl.className = 'test-result success';
+            resultEl.textContent = `✓ Connected — model: ${modelUsed}`;
+            setConnectionStatus('connected', modelUsed);
+
+        } catch (err) {
+            resultEl.className = 'test-result error';
+            resultEl.textContent = `✗ ${err.message}. Check LM Studio server is running with CORS enabled.`;
+            setConnectionStatus('error');
+        }
+    }
+
+    async function testConnectionSilent() {
+        try {
+            const body = {
+                messages: [
+                    { role: 'system', content: 'Respond with only: OK' },
+                    { role: 'user', content: 'ping' }
+                ],
+                max_tokens: 10,
+                temperature: 0
+            };
+            if (config.model) body.model = config.model;
+
+            const resp = await fetch(config.endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (!resp.ok) throw new Error();
+            const data = await resp.json();
+            setConnectionStatus('connected', data.model || config.model || 'auto');
+        } catch {
+            setConnectionStatus('error');
+        }
+    }
+
+    function setConnectionStatus(status, modelName) {
+        const dot = document.getElementById('conn-dot');
+        const label = document.getElementById('conn-label');
+        const indicator = document.getElementById('model-indicator');
+
+        dot.className = 'conn-dot';
+
+        if (status === 'connected') {
+            dot.classList.add('connected');
+            label.textContent = 'Connected';
+            indicator.style.color = 'var(--confidence-high)';
+            if (modelName) {
+                document.getElementById('model-name').textContent = `LM Studio · ${modelName}`;
+            }
+        } else if (status === 'error') {
+            dot.classList.add('error');
+            label.textContent = 'Disconnected';
+            indicator.style.color = 'var(--confidence-low)';
+        }
+    }
+
+    // ============================================================
+    // KEYBOARD SHORTCUT
+    // ============================================================
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeSettings();
+        // Ctrl/Cmd + K to focus input
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('user-input').focus();
+        }
+    });
+
+    // Click outside modal to close
+    document.getElementById('settings-modal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('settings-modal')) closeSettings();
+    });
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    window.addEventListener('load', () => {
+        document.getElementById('user-input').focus();
+        // Try to connect on load
+        setTimeout(testConnectionSilent, 500);
+    });
+    </script>
+</body>
+</html>
